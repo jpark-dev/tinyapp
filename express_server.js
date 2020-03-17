@@ -48,11 +48,17 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  // console.log(req.params);
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
 app.post("/urls", (req, res) => {
   const shortStr = generateRandomString();
   urlDatabase[shortStr] = req.body.longURL;
   res.redirect(`/urls/${shortStr}`);
-})
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
