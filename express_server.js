@@ -33,11 +33,19 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+app.post("/urls", (req, res) => {
+  console.log(req.body);
+  res.send("OK");
+})
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+const generateRandomString = () => {
+  return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 6);
+}
