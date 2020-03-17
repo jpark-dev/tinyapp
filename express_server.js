@@ -72,10 +72,17 @@ app.post("/urls/:shortURL", (req, res) => {
   const url = urlDatabase[oldName];
   delete urlDatabase[oldName];
   urlDatabase[newName] = url;
-  
+
   let templateVars = { shortURL: newName, longURL: urlDatabase[newName] };
   console.log(templateVars);
   res.render("urls_show", templateVars);
+});
+
+app.post("/login", (req, res) => {
+  console.log(req.body);
+  res
+    .cookie(`username`, `${req.body.username}`)
+    .redirect(301, '/urls');
 });
 
 app.listen(PORT, () => {
