@@ -11,7 +11,7 @@ const generateRandomString = () => {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
-}
+};
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -37,6 +37,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  console.log(templateVars);
   res.render("urls_show", templateVars);
 });
 
@@ -63,7 +64,19 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
-})
+});
+
+app.post("/urls/:shortURL", (req, res) => {
+  const oldName = req.params.shortURL;
+  const newName = req.body.nname;
+  const url = urlDatabase[oldName];
+  delete urlDatabase[oldName];
+  urlDatabase[newName] = url;
+  
+  let templateVars = { shortURL: newName, longURL: urlDatabase[newName] };
+  console.log(templateVars);
+  res.render("urls_show", templateVars);
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
