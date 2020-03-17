@@ -2,6 +2,10 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
+const generateRandomString = () => {
+  return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 6);
+}
+
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -39,13 +43,11 @@ app.get("/hello", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body);
+  // let ranString = generateRandomString();
+  urlDatabase[generateRandomString()] = req.body.longURL;
   res.send("OK");
 })
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-const generateRandomString = () => {
-  return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 6);
-}
