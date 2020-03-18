@@ -22,7 +22,18 @@ const urlDatabase = {
 
 const users = {
 
-}
+};
+
+const createUserObj = (req) => {
+  const userID = req.cookies["user_id"];
+  const user = {};
+  for (let uid in users) {
+    if (users[uid].id === userID) {
+      Object.assign(user, users[userID]);
+    }
+  }
+  return user;
+};
 
 app.use(cookieParser());
 
@@ -35,17 +46,22 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+
+  const user = createUserObj(req);
+  let templateVars = { urls: urlDatabase, user };
   res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  const user = createUserObj(req);
+  let templateVars = { user };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"] };
+  const user = createUserObj(req);
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user };
   res.render("urls_show", templateVars);
 });
 
@@ -68,7 +84,9 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  const user = createUserObj(req);
+
+  let templateVars = { user };
   res.render("urls_register", templateVars);
 });
 
@@ -90,19 +108,27 @@ app.post("/urls/:shortURL", (req, res) => {
   delete urlDatabase[oldName];
   urlDatabase[newName] = url;
 
-  let templateVars = { shortURL: newName, longURL: urlDatabase[newName], username: req.cookies["username"] };
+  const user = createUserObj(req);
+
+  let templateVars = { shortURL: newName, longURL: urlDatabase[newName], user };
   res.render("urls_show", templateVars);
 });
 
 app.post("/login", (req, res) => {
-  res
-    .cookie(`username`, `${req.body.username}`)
-    .redirect(301, '/urls');
+
+  for (let uid in users) {
+    if (users[uid].email === req.body.email) {
+      return res
+        .cookie(`user_id`, `${users[uid].id}`)
+        .redirect(301, '/urls');
+    }
+  }
+  res.send('<script type="text/javascript">alert("The email address does not exist.");window.history.back();</script>')
 });
 
 app.post("/logout", (req, res) => {
   res
-    .clearCookie('username')
+    .clearCookie('user_id')
     .redirect(301, '/urls');
 });
 
@@ -111,7 +137,7 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  users[id] = 
+  users[id] =
   {
     id, email, password
   }
@@ -120,10 +146,8 @@ app.post("/register", (req, res) => {
     .cookie(`user_id`, `${id}`)
     .redirect(301, '/urls');
 
-  console.log(users);
+  console.log('users DB:', users);
 
-  // let templateVars = { username: req.cookies["username"] };
-  // res.render("urls_register", templateVars);
 });
 
 app.listen(PORT, () => {
