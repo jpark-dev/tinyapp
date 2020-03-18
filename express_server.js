@@ -4,9 +4,9 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 
-const generateRandomString = () => {
+const generateRandomString = (num) => {
   let result = '';
-  const length = 6;
+  const length = num;
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charactersLength = characters.length;
   for (let i = 0; i < length; i++) {
@@ -15,16 +15,21 @@ const generateRandomString = () => {
   return result;
 };
 
+const urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
+
+const users = {
+  
+}
+
 app.use(cookieParser());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -68,7 +73,7 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const shortStr = generateRandomString();
+  const shortStr = generateRandomString(6);
   urlDatabase[shortStr] = req.body.longURL;
   res.redirect(`/urls/${shortStr}`);
 });
