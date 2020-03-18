@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 
 const generateRandomString = () => {
   let result = '';
@@ -13,7 +15,8 @@ const generateRandomString = () => {
   return result;
 };
 
-const bodyParser = require("body-parser");
+app.use(cookieParser());
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
@@ -28,16 +31,16 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };
   res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
-  console.log(templateVars);
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"] };
   res.render("urls_show", templateVars);
 });
 
@@ -50,7 +53,6 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  // console.log(req.params);
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
@@ -73,15 +75,19 @@ app.post("/urls/:shortURL", (req, res) => {
   delete urlDatabase[oldName];
   urlDatabase[newName] = url;
 
-  let templateVars = { shortURL: newName, longURL: urlDatabase[newName] };
-  console.log(templateVars);
+  let templateVars = { shortURL: newName, longURL: urlDatabase[newName], username: req.cookies["username"] };
   res.render("urls_show", templateVars);
 });
 
 app.post("/login", (req, res) => {
-  console.log(req.body);
   res
     .cookie(`username`, `${req.body.username}`)
+    .redirect(301, '/urls');
+});
+
+app.post("/logout", (req, res) => {
+  res
+    .clearCookie('username')
     .redirect(301, '/urls');
 });
 
