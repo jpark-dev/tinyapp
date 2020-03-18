@@ -12,10 +12,11 @@
       </div>
       <div class="navbar-collapse nav justify-content-end">
         <% if (!user.email) { %>
-        <form class="form-inline" action="/login" method="POST">
-          <span style="padding-right: 10px">ID:</span>
-          <input class="form-control mr-sm-2" type="text" name="email">
-          <input type="submit" class="btn btn-primary" value="login">
+        <form class="form-inline" action="/register" method="GET">
+          <input type="submit" class="btn btn-primary" value="Register">
+        </form>
+        <form style ="padding-left: 10px;" class="form-inline" action="/login" method="GET">
+          <input type="submit" class="btn btn-secondary" value="Login">
         </form>
         <% } else { %>
         <form class="form-inline" action="/logout" method="POST">
