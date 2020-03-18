@@ -30,13 +30,13 @@
           <td><a href="/urls/<%= url %>"><%= url %></a></td>
           <td><%= urls[url] %></td>
           <td>
-            <form>
-              <input type="button" onclick="window.location.href = '/urls/<%= url %>'" value="Edit">
+            <form class="form-inline">
+              <input type="button" class="btn btn-outline-success" onclick="window.location.href = '/urls/<%= url %>'" value="Edit">
             </form>
           </td>
           <td>
-            <form method="POST" action="/urls/<%= url %>/delete">
-              <input type="submit" value="DELETE">
+            <form class="form-inline" method="POST" action="/urls/<%= url %>/delete">
+              <input type="submit" class="btn btn-outline-danger" value="DELETE">
             </form>
           </td>
         </tr>
