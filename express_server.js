@@ -21,7 +21,7 @@ const urlDatabase = {
 };
 
 const users = {
-  
+
 }
 
 app.use(cookieParser());
@@ -104,6 +104,26 @@ app.post("/logout", (req, res) => {
   res
     .clearCookie('username')
     .redirect(301, '/urls');
+});
+
+app.post("/register", (req, res) => {
+  let id = generateRandomString(6);
+  const email = req.body.email;
+  const password = req.body.password;
+
+  users[id] = 
+  {
+    id, email, password
+  }
+
+  res
+    .cookie(`user_id`, `${id}`)
+    .redirect(301, '/urls');
+
+  console.log(users);
+
+  // let templateVars = { username: req.cookies["username"] };
+  // res.render("urls_register", templateVars);
 });
 
 app.listen(PORT, () => {
