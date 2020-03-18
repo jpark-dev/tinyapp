@@ -21,7 +21,11 @@ const urlDatabase = {
 };
 
 const users = {
-
+  "aaaaaa" : {
+    id: "aaaaaa",
+    email: "aaa@a.com",
+    password: "aaa"
+  }
 };
 
 const createUserObj = (req) => {
@@ -88,6 +92,13 @@ app.get("/register", (req, res) => {
 
   let templateVars = { user };
   res.render("urls_register", templateVars);
+});
+
+app.get("/login", (req, res) => {
+  const user = createUserObj(req);
+
+  let templateVars = { user };
+  res.render("urls_login", templateVars);
 });
 
 app.post("/urls", (req, res) => {
