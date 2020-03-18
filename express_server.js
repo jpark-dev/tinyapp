@@ -76,7 +76,7 @@ app.get("/hello", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   if (longURL === undefined) {
-    res.send('<script type="text/javascript">alert("The URL is invalid or currently inaccessible.");window.history.back();</script>')
+    res.send('<script type="text/javascript">alert("The URL is invalid or currently inaccessible.");window.history.back();</script>');
   } else {
     res.redirect(longURL);
 
@@ -115,6 +115,10 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  if (req.body.email === '') {
+    // res.statusCode = 404;
+    return res.send('<script type="text/javascript">alert("The email address does not exist.");window.history.back();</script>');
+  }
 
   for (let uid in users) {
     if (users[uid].email === req.body.email) {
@@ -123,7 +127,6 @@ app.post("/login", (req, res) => {
         .redirect(301, '/urls');
     }
   }
-  res.send('<script type="text/javascript">alert("The email address does not exist.");window.history.back();</script>')
 });
 
 app.post("/logout", (req, res) => {
@@ -133,14 +136,19 @@ app.post("/logout", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  let id = generateRandomString(6);
   const email = req.body.email;
   const password = req.body.password;
+
+  if (email === '' || password === '') {
+    // res.statusCode = 404;
+    return res.send('<script type="text/javascript">alert("Please enter both your email and password");window.history.back();</script>');
+  }
+  let id = generateRandomString(6);
 
   users[id] =
   {
     id, email, password
-  }
+  };
 
   res
     .cookie(`user_id`, `${id}`)
