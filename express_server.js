@@ -70,6 +70,10 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const user = createUserObj(req);
   let templateVars = { user };
+  
+  if (Object.keys(user).length === 0) {
+    return res.render("urls_login", templateVars);
+  }
   res.render("urls_new", templateVars);
 });
 
