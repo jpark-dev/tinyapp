@@ -140,8 +140,21 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
 
   if (email === '' || password === '') {
-    // res.statusCode = 404;
+    res.statusCode = 400;
     return res.send('<script type="text/javascript">alert("Please enter both your email and password");window.history.back();</script>');
+  }
+
+  let isEmailExist = false;
+  for (let user in users) {
+    if (users[user].email === email) {
+      console.log(user.email, email);
+      isEmailExist = true;
+    }
+  }
+
+  if (isEmailExist) {
+    res.statusCode = 400;
+    return res.send('<script type="text/javascript">alert("The email is already being used.");window.history.back();</script>');
   }
   let id = generateRandomString(6);
 
