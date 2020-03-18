@@ -16,19 +16,13 @@ const generateRandomString = (num) => {
 
 const isEmailExist = (req) => {
   for (let uid in users) {
-    if (users[uid].email === req.body.email) {
-      return true;
-    }
+    if (users[uid].email === req.body.email) { return uid; }
   }
   return false;
 };
 
-const isPasswordCorrect = (req) => {
-  for (let uid in users) {
-    if (users[uid].password === req.body.password) {
-      return uid;
-    }
-  }
+const isPasswordCorrect = (uid, req) => {
+  if (users[uid].password === req.body.password) { return uid; }
   return false;
 };
 
@@ -68,7 +62,6 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-
   const user = createUserObj(req);
   let templateVars = { urls: urlDatabase, user };
   res.render("urls_index", templateVars);
@@ -99,21 +92,18 @@ app.get("/u/:shortURL", (req, res) => {
   if (longURL === undefined) {
     res.send('<script type="text/javascript">alert("The URL is invalid or currently inaccessible.");window.history.back();</script>');
   } else {
-    res.redirect(longURL);
-
+    res.redirect(301, longURL);
   }
 });
 
 app.get("/register", (req, res) => {
   const user = createUserObj(req);
-
   let templateVars = { user };
   res.render("urls_register", templateVars);
 });
 
 app.get("/login", (req, res) => {
   const user = createUserObj(req);
-
   let templateVars = { user };
   res.render("urls_login", templateVars);
 });
@@ -149,8 +139,10 @@ app.post("/login", (req, res) => {
     return res.send('<script type="text/javascript">alert("Please enter both the email and password.");window.history.back();</script>');
   }
 
-  if (isEmailExist(req)) {
-    const isValid = isPasswordCorrect(req);
+  const checkEmail = isEmailExist(req);
+  
+  if (checkEmail) {
+    const isValid = isPasswordCorrect(checkEmail, req);
     if (isValid) {
       return res
         .cookie(`user_id`, `${users[isValid].id}`)
