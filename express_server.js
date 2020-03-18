@@ -6,13 +6,30 @@ const cookieParser = require('cookie-parser');
 
 const generateRandomString = (num) => {
   let result = '';
-  const length = num;
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charactersLength = characters.length;
-  for (let i = 0; i < length; i++) {
+  for (let i = 0; i < num; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
+};
+
+const isEmailExist = (req) => {
+  for (let uid in users) {
+    if (users[uid].email === req.body.email) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const isPasswordCorrect = (req) => {
+  for (let uid in users) {
+    if (users[uid].password === req.body.password) {
+      return uid;
+    }
+  }
+  return false;
 };
 
 const urlDatabase = {
@@ -21,7 +38,7 @@ const urlDatabase = {
 };
 
 const users = {
-  "aaaaaa" : {
+  "aaaaaa": {
     id: "aaaaaa",
     email: "aaa@a.com",
     password: "aaa"
@@ -45,11 +62,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
-
+// GET handlers
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
-
 
 app.get("/urls", (req, res) => {
 
@@ -57,6 +73,7 @@ app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase, user };
   res.render("urls_index", templateVars);
 });
+
 app.get("/urls/new", (req, res) => {
   const user = createUserObj(req);
   let templateVars = { user };
@@ -101,6 +118,8 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 
+// POST handlers
+
 app.post("/urls", (req, res) => {
   const shortStr = generateRandomString(6);
   urlDatabase[shortStr] = req.body.longURL;
@@ -126,18 +145,20 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  if (req.body.email === '') {
-    // res.statusCode = 404;
-    return res.send('<script type="text/javascript">alert("The email address does not exist.");window.history.back();</script>');
+  if (req.body.email === '' || req.body.password === '') {
+    return res.send('<script type="text/javascript">alert("Please enter both the email and password.");window.history.back();</script>');
   }
 
-  for (let uid in users) {
-    if (users[uid].email === req.body.email) {
+  if (isEmailExist(req)) {
+    const isValid = isPasswordCorrect(req);
+    if (isValid) {
       return res
-        .cookie(`user_id`, `${users[uid].id}`)
+        .cookie(`user_id`, `${users[isValid].id}`)
         .redirect(301, '/urls');
     }
   }
+  return res.status(403).send('<script type="text/javascript">alert("Incorrect Email or password. Please try again.");window.history.back();</script>');
+
 });
 
 app.post("/logout", (req, res) => {
@@ -155,15 +176,7 @@ app.post("/register", (req, res) => {
     return res.send('<script type="text/javascript">alert("Please enter both your email and password");window.history.back();</script>');
   }
 
-  let isEmailExist = false;
-  for (let user in users) {
-    if (users[user].email === email) {
-      console.log(user.email, email);
-      isEmailExist = true;
-    }
-  }
-
-  if (isEmailExist) {
+  if (isEmailExist(req)) {
     res.statusCode = 400;
     return res.send('<script type="text/javascript">alert("The email is already being used.");window.history.back();</script>');
   }
