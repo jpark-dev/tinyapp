@@ -54,7 +54,12 @@ app.get("/hello", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+  if (longURL === undefined) {
+    res.send('<script type="text/javascript">alert("The URL is invalid or currently inaccessible.");window.history.back();</script>')
+  } else {
+    res.redirect(longURL);
+
+  }
 });
 
 app.post("/urls", (req, res) => {
