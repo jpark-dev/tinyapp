@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require("bcrypt");
 
 const generateRandomString = (num) => {
@@ -52,7 +52,7 @@ const users = {
 };
 
 const createUserObj = (req) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session.user_id;
   const user = {};
   for (let uid in users) {
     if (users[uid].id === userID) {
@@ -62,7 +62,10 @@ const createUserObj = (req) => {
   return user;
 };
 
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -208,9 +211,8 @@ app.post("/login", (req, res) => {
   if (checkEmail) {
     const isValid = isPasswordCorrect(checkEmail, req);
     if (isValid) {
-      return res
-        .cookie(`user_id`, `${users[isValid].id}`)
-        .redirect(301, '/urls');
+      req.session.user_id = users[isValid].id;
+      return res.redirect(301, '/urls');
     }
   }
   return res.status(403).send('<script type="text/javascript">alert("Incorrect Email or password. Please try again.");window.history.back();</script>');
@@ -219,9 +221,8 @@ app.post("/login", (req, res) => {
 
 // logout
 app.post("/logout", (req, res) => {
-  res
-    .clearCookie('user_id')
-    .redirect(301, '/urls');
+  req.session = null;
+  res.redirect(301, '/urls');
 });
 
 // register new account
@@ -245,11 +246,8 @@ app.post("/register", (req, res) => {
     id, email, password
   };
 
-  console.log(users);
-
-  res
-    .cookie(`user_id`, `${id}`)
-    .redirect(301, '/urls');
+  req.session.user_id = id;
+  res.redirect(301, '/urls');
 });
 
 app.listen(PORT, () => {
