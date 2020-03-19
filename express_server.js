@@ -62,7 +62,7 @@ app.get("/", (req, res) => {
 });
 
 const createUserUrl = (user) => {
-  
+
   const userUrl = {};
   for (el in urlDatabase) {
     if (urlDatabase[el].userID === user.id) {
@@ -83,7 +83,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const user = createUserObj(req);
   let templateVars = { user };
-  
+
   if (Object.keys(user).length === 0) {
     return res.render("urls_login", templateVars);
   }
@@ -92,7 +92,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const user = createUserObj(req);
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user };
   res.render("urls_show", templateVars);
 });
 
@@ -105,7 +105,15 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  // if short URL does not exist in DB
+  if (!urlDatabase[req.params.shortURL]) {
+    return res.send('<script type="text/javascript">alert("Invalid short URL. Please check again.");window.history.back();</script>');
+  }
+
+  // if exists
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+
+  console.log('longURL: ', longURL);
   if (longURL === undefined) {
     res.send('<script type="text/javascript">alert("The URL is invalid or currently inaccessible.");window.history.back();</script>');
   } else {
@@ -157,7 +165,7 @@ app.post("/login", (req, res) => {
   }
 
   const checkEmail = isEmailExist(req);
-  
+
   if (checkEmail) {
     const isValid = isPasswordCorrect(checkEmail, req);
     if (isValid) {
