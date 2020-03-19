@@ -15,6 +15,10 @@
 <body>
   <main style="margin: 1em;">
     <h3>My URLs</h3>
+    <% if (Object.keys(user).length === 0) { %>
+    <span>Please login to manage your short URLS.</span>
+    <span>If you don't have an account yet, why don't you create one now?</span>
+    <% } %>
     <table class="table">
       <thead>
         <tr>
