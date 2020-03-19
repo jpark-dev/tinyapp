@@ -27,8 +27,8 @@ const isPasswordCorrect = (uid, req) => {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "aaaaaa" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "aaaaaa" }
 };
 
 const users = {
@@ -61,9 +61,22 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+const createUserUrl = (user) => {
+  
+  const userUrl = {};
+  for (el in urlDatabase) {
+    if (urlDatabase[el].userID === user.id) {
+      userUrl[el] = urlDatabase[el].longURL;
+    }
+  }
+  return userUrl;
+};
+
 app.get("/urls", (req, res) => {
   const user = createUserObj(req);
-  let templateVars = { urls: urlDatabase, user };
+  const userUrl = createUserUrl(user);
+
+  const templateVars = { urls: userUrl, user };
   res.render("urls_index", templateVars);
 });
 
