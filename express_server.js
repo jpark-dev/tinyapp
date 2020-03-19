@@ -15,14 +15,16 @@ const generateRandomString = (num) => {
   return result;
 };
 
-const isEmailExist = (req) => {
-  for (let uid in users) {
-    if (users[uid].email === req.body.email) {
-      return uid;
-    }
-  }
-  return false;
-};
+const helperFn = require('./helpers');
+
+// const getUserByEmail = (email, userDB) => {
+//   for (let uid in userDB) {
+//     if (userDB[uid].email === email) {
+//       return uid;
+//     }
+//   }
+//   return false;
+// };
 
 const isPasswordCorrect = (uid, req) => {
   if (bcrypt.compareSync(req.body.password, users[uid].password)) {
@@ -202,11 +204,14 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // login
 app.post("/login", (req, res) => {
-  if (req.body.email === '' || req.body.password === '') {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (email === '' || password === '') {
     return res.send('<script type="text/javascript">alert("Please enter both the email and password.");window.history.back();</script>');
   }
 
-  const checkEmail = isEmailExist(req);
+  const checkEmail = helperFn.getUserByEmail(email, users);
 
   if (checkEmail) {
     const isValid = isPasswordCorrect(checkEmail, req);
@@ -235,7 +240,7 @@ app.post("/register", (req, res) => {
     return res.send('<script type="text/javascript">alert("Please enter both your email and password");window.history.back();</script>');
   }
 
-  if (isEmailExist(req)) {
+  if (helperFn.getUserByEmail(email, users)) {
     res.statusCode = 400;
     return res.send('<script type="text/javascript">alert("The email is already being used.");window.history.back();</script>');
   }
