@@ -4,41 +4,7 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcrypt");
-
-const generateRandomString = (num) => {
-  let result = '';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const charactersLength = characters.length;
-  for (let i = 0; i < num; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-};
-
 const helperFn = require('./helpers');
-
-// const getUserByEmail = (email, userDB) => {
-//   for (let uid in userDB) {
-//     if (userDB[uid].email === email) {
-//       return uid;
-//     }
-//   }
-//   return false;
-// };
-
-const isPasswordCorrect = (uid, req) => {
-  if (bcrypt.compareSync(req.body.password, users[uid].password)) {
-    return uid;
-  }
-  return false;
-};
-
-const urlsForUser = (user, req) => {
-  if (user.id !== urlDatabase[req.params.shortURL].userID) {
-    return false;
-  }
-  return true;
-};
 
 const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "aaaaaa" },
@@ -51,17 +17,6 @@ const users = {
     email: "aaa@a.com",
     password: "aaa"
   }
-};
-
-const createUserObj = (req) => {
-  const userID = req.session.user_id;
-  const user = {};
-  for (let uid in users) {
-    if (users[uid].id === userID) {
-      Object.assign(user, users[userID]);
-    }
-  }
-  return user;
 };
 
 app.use(cookieSession({
@@ -78,20 +33,12 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-const createUserUrl = (user) => {
-  const userUrl = {};
-  for (let el in urlDatabase) {
-    if (urlDatabase[el].userID === user.id) {
-      userUrl[el] = urlDatabase[el].longURL;
-    }
-  }
-  return userUrl;
-};
-
 // show collection of urls for that user
 app.get("/urls", (req, res) => {
-  const user = createUserObj(req);
-  const userUrl = createUserUrl(user);
+  const user = helperFn.createUserObj(req, users);
+
+  console.log(user, urlDatabase);
+  const userUrl = helperFn.createUserUrl(user, urlDatabase);
 
   const templateVars = { urls: userUrl, user };
   res.render("urls_index", templateVars);
@@ -99,7 +46,7 @@ app.get("/urls", (req, res) => {
 
 // move to URL creating page
 app.get("/urls/new", (req, res) => {
-  const user = createUserObj(req);
+  const user = helperFn.createUserObj(req, users);
   const templateVars = { user };
 
   if (Object.keys(user).length === 0) {
@@ -110,7 +57,7 @@ app.get("/urls/new", (req, res) => {
 
 // move to url edit page
 app.get("/urls/:shortURL", (req, res) => {
-  const user = createUserObj(req);
+  const user = helperFn.createUserObj(req, users);
 
   // if not logged in
   if (Object.keys(user).length === 0) {
@@ -118,7 +65,7 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 
   // if trying to modify someone else's url
-  if (!urlsForUser(user, req)) {
+  if (!helperFn.urlsForUser(req, user, urlDatabase)) {
     return res.send('<script type="text/javascript">alert("You can only modify your own URLs.");window.history.back();</script>');
   }
 
@@ -155,14 +102,14 @@ app.get("/u/:shortURL", (req, res) => {
 
 // register page
 app.get("/register", (req, res) => {
-  const user = createUserObj(req);
+  const user = helperFn.createUserObj(req, users);
   let templateVars = { user };
   res.render("urls_register", templateVars);
 });
 
 // login page
 app.get("/login", (req, res) => {
-  const user = createUserObj(req);
+  const user = helperFn.createUserObj(req, users);
   let templateVars = { user };
   res.render("urls_login", templateVars);
 });
@@ -171,8 +118,8 @@ app.get("/login", (req, res) => {
 
 // create new short URL
 app.post("/urls", (req, res) => {
-  const user = createUserObj(req);
-  const shortStr = generateRandomString(6);
+  const user = helperFn.createUserObj(req, users);
+  const shortStr = helperFn.generateRandomString(6);
   const newData = {};
 
   newData.longURL = req.body.longURL;
@@ -196,7 +143,7 @@ app.post("/urls/:shortURL", (req, res) => {
   delete urlDatabase[oldName];
   urlDatabase[newName] = url;
 
-  const user = createUserObj(req);
+  const user = helperFn.createUserObj(req, users);
 
   let templateVars = { shortURL: newName, longURL: urlDatabase[newName], user };
   res.render("urls_show", templateVars);
@@ -214,7 +161,7 @@ app.post("/login", (req, res) => {
   const checkEmail = helperFn.getUserByEmail(email, users);
 
   if (checkEmail) {
-    const isValid = isPasswordCorrect(checkEmail, req);
+    const isValid = helperFn.isPasswordCorrect(req, checkEmail, bcrypt, users);
     if (isValid) {
       req.session.user_id = users[isValid].id;
       return res.redirect(301, '/urls');
@@ -244,7 +191,7 @@ app.post("/register", (req, res) => {
     res.statusCode = 400;
     return res.send('<script type="text/javascript">alert("The email is already being used.");window.history.back();</script>');
   }
-  let id = generateRandomString(6);
+  let id = helperFn.generateRandomString(6);
 
   users[id] =
   {
