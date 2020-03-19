@@ -21,4 +21,10 @@ describe('getUserByEmail', () => {
     // Write your assert statement here
     assert.equal(user, expectedOutput);
   });
+  it('should return undefined with invalid email address', () => {
+    const user = getUserByEmail("user3@example.com", testUsers)
+    const expectedOutput = undefined;
+    assert.equal(user, expectedOutput);
+
+  })
 });

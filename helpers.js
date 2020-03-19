@@ -4,7 +4,7 @@ const getUserByEmail = (email, userDB) => {
       return uid;
     }
   }
-  return false;
+  return undefined;
 };
 
 const isPasswordCorrect = (req, uid, bcrypt, userDB) => {
