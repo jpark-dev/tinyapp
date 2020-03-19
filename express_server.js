@@ -16,14 +16,25 @@ const generateRandomString = (num) => {
 
 const isEmailExist = (req) => {
   for (let uid in users) {
-    if (users[uid].email === req.body.email) { return uid; }
+    if (users[uid].email === req.body.email) {
+      return uid;
+    }
   }
   return false;
 };
 
 const isPasswordCorrect = (uid, req) => {
-  if (users[uid].password === req.body.password) { return uid; }
+  if (users[uid].password === req.body.password) {
+    return uid;
+  }
   return false;
+};
+
+const urlsForUser = (user, req) => {
+  if (user.id !== urlDatabase[req.params.shortURL].userID) {
+    return false;
+  }
+  return true;
 };
 
 const urlDatabase = {
@@ -64,7 +75,7 @@ app.get("/", (req, res) => {
 const createUserUrl = (user) => {
 
   const userUrl = {};
-  for (el in urlDatabase) {
+  for (let el in urlDatabase) {
     if (urlDatabase[el].userID === user.id) {
       userUrl[el] = urlDatabase[el].longURL;
     }
@@ -90,9 +101,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-const urlsForUser = (id) => {
 
-};
 
 app.get("/urls/:shortURL", (req, res) => {
   const user = createUserObj(req);
@@ -101,7 +110,7 @@ app.get("/urls/:shortURL", (req, res) => {
     return res.send('<script type="text/javascript">alert("Please login to modify your short URL.");window.history.back();</script>');
   }
 
-  if (user.id !== urlDatabase[req.params.shortURL].userID){
+  if (!urlsForUser(user, req)) {
     return res.send('<script type="text/javascript">alert("You can only modify your own URLs.");window.history.back();</script>');
   }
 
@@ -153,8 +162,8 @@ app.post("/urls", (req, res) => {
   const newData = {};
 
   newData.longURL = req.body.longURL;
-  newData.userID = user.id; 
-  urlDatabase[shortStr] = newData; 
+  newData.userID = user.id;
+  urlDatabase[shortStr] = newData;
 
   res.redirect(`/urls/${shortStr}`);
 });
