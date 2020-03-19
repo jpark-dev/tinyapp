@@ -92,6 +92,12 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const user = createUserObj(req);
+
+  if (Object.keys(user).length === 0) {
+    return res.send('<script type="text/javascript">alert("Please login to modify your short URL.");window.history.back();</script>');
+  }
+  
+  console.log('user: ', user);
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user };
   res.render("urls_show", templateVars);
 });
@@ -113,7 +119,6 @@ app.get("/u/:shortURL", (req, res) => {
   // if exists
   const longURL = urlDatabase[req.params.shortURL].longURL;
 
-  console.log('longURL: ', longURL);
   if (longURL === undefined) {
     res.send('<script type="text/javascript">alert("The URL is invalid or currently inaccessible.");window.history.back();</script>');
   } else {
@@ -136,8 +141,14 @@ app.get("/login", (req, res) => {
 // POST handlers
 
 app.post("/urls", (req, res) => {
+  const user = createUserObj(req);
   const shortStr = generateRandomString(6);
-  urlDatabase[shortStr] = req.body.longURL;
+  const newData = {};
+
+  newData.longURL = req.body.longURL;
+  newData.userID = user.id; 
+  urlDatabase[shortStr] = newData; 
+
   res.redirect(`/urls/${shortStr}`);
 });
 
