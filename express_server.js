@@ -90,14 +90,21 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+const urlsForUser = (id) => {
+
+};
+
 app.get("/urls/:shortURL", (req, res) => {
   const user = createUserObj(req);
 
   if (Object.keys(user).length === 0) {
     return res.send('<script type="text/javascript">alert("Please login to modify your short URL.");window.history.back();</script>');
   }
-  
-  console.log('user: ', user);
+
+  if (user.id !== urlDatabase[req.params.shortURL].userID){
+    return res.send('<script type="text/javascript">alert("You can only modify your own URLs.");window.history.back();</script>');
+  }
+
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user };
   res.render("urls_show", templateVars);
 });
@@ -218,8 +225,6 @@ app.post("/register", (req, res) => {
   res
     .cookie(`user_id`, `${id}`)
     .redirect(301, '/urls');
-
-  console.log('users DB:', users);
 
 });
 
