@@ -73,7 +73,6 @@ app.get("/", (req, res) => {
 });
 
 const createUserUrl = (user) => {
-
   const userUrl = {};
   for (let el in urlDatabase) {
     if (urlDatabase[el].userID === user.id) {
@@ -83,6 +82,7 @@ const createUserUrl = (user) => {
   return userUrl;
 };
 
+// show collection of urls for that user
 app.get("/urls", (req, res) => {
   const user = createUserObj(req);
   const userUrl = createUserUrl(user);
@@ -91,9 +91,10 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+// move to URL creating page
 app.get("/urls/new", (req, res) => {
   const user = createUserObj(req);
-  let templateVars = { user };
+  const templateVars = { user };
 
   if (Object.keys(user).length === 0) {
     return res.render("urls_login", templateVars);
@@ -101,31 +102,35 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-
-
+// move to url edit page
 app.get("/urls/:shortURL", (req, res) => {
   const user = createUserObj(req);
 
+  // if not logged in
   if (Object.keys(user).length === 0) {
     return res.send('<script type="text/javascript">alert("Please login to modify your short URL.");window.history.back();</script>');
   }
 
+  // if trying to modify someone else's url
   if (!urlsForUser(user, req)) {
     return res.send('<script type="text/javascript">alert("You can only modify your own URLs.");window.history.back();</script>');
   }
 
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user };
   res.render("urls_show", templateVars);
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+// was used for testing json file
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+// was used for initial test
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
 
+// direct to the original URL
 app.get("/u/:shortURL", (req, res) => {
   // if short URL does not exist in DB
   if (!urlDatabase[req.params.shortURL]) {
@@ -142,12 +147,14 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
+// register page
 app.get("/register", (req, res) => {
   const user = createUserObj(req);
   let templateVars = { user };
   res.render("urls_register", templateVars);
 });
 
+// login page
 app.get("/login", (req, res) => {
   const user = createUserObj(req);
   let templateVars = { user };
@@ -156,6 +163,7 @@ app.get("/login", (req, res) => {
 
 // POST handlers
 
+// create new short URL
 app.post("/urls", (req, res) => {
   const user = createUserObj(req);
   const shortStr = generateRandomString(6);
@@ -168,11 +176,13 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortStr}`);
 });
 
+// delete URL
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
 
+// edit short URL
 app.post("/urls/:shortURL", (req, res) => {
   const oldName = req.params.shortURL;
   const newName = req.body.nname;
@@ -186,6 +196,7 @@ app.post("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// login
 app.post("/login", (req, res) => {
   if (req.body.email === '' || req.body.password === '') {
     return res.send('<script type="text/javascript">alert("Please enter both the email and password.");window.history.back();</script>');
@@ -205,12 +216,14 @@ app.post("/login", (req, res) => {
 
 });
 
+// logout
 app.post("/logout", (req, res) => {
   res
     .clearCookie('user_id')
     .redirect(301, '/urls');
 });
 
+// register new account
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -234,7 +247,6 @@ app.post("/register", (req, res) => {
   res
     .cookie(`user_id`, `${id}`)
     .redirect(301, '/urls');
-
 });
 
 app.listen(PORT, () => {
