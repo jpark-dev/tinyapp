@@ -14,8 +14,8 @@ const isPasswordCorrect = (password, uid, bcrypt, userDB) => {
   return false;
 };
 
-const urlsForUser = (req, user, urlDB) => {
-  if (user.id !== urlDB[req.params.shortURL].userID) {
+const urlsForUser = (shortURL, userID, urlDB) => {
+  if (userID !== urlDB[shortURL].userID) {
     return false;
   }
   return true;

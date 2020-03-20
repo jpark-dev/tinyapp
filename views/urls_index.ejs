@@ -34,8 +34,8 @@
           <td><a href="/urls/<%= url %>"><%= url %></a></td>
           <td><%= urls[url] %></td>
           <td>
-            <form class="form-inline">
-              <input type="button" class="btn btn-outline-success" onclick="window.location.href = '/urls/<%= url %>'" value="Edit">
+            <form class="form-inline" method="GET" action="/urls/<%= url %>">
+              <input type="submit" class="btn btn-outline-success" value="Edit">
             </form>
           </td>
           <td>

@@ -38,18 +38,11 @@ app.get("/", (req, res) => {
 
 // show collection of urls for that user
 app.get("/urls", (req, res) => {
-  console.log('urls!!!');
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
-
-  const userIDForUrl = user.id;
-  const userUrl = helperFn.createUserUrl(userIDForUrl, urlDatabase);
-
-  // if (Object.keys(user).length === 0) {
-  //   return res.send('<script type="text/javascript">alert("Please login.");window.history.back();</script>');
-  // }
-
+  const userUrl = helperFn.createUserUrl(userID, urlDatabase);
   const templateVars = { urls: userUrl, user };
+
   res.render("urls_index", templateVars);
 });
 
@@ -59,7 +52,7 @@ app.get("/urls/new", (req, res) => {
   const user = helperFn.createUserObj(userID, users);
   const templateVars = { user };
 
-  if (Object.keys(user).length === 0) {
+  if (!userID) {
     return res.redirect(301, "/login");
   }
   res.render("urls_new", templateVars);
@@ -69,30 +62,28 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
+  const shortURL = req.params.shortURL;
+  const isURL = urlDatabase[shortURL];
 
   // if not logged in
-  if (Object.keys(user).length === 0) {
+  if (!userID) {
     return res.send('<script type="text/javascript">alert("Please login to modify your short URL.");window.history.back();</script>');
   }
 
+  // if url does not exist
+  if (!isURL) {
+    return res.send('<script type="text/javascript">alert("Not a valid URL.");window.history.back();</script>');
+
+  }
+
   // if trying to modify someone else's url
-  if (!helperFn.urlsForUser(req, user, urlDatabase)) {
+  if (!helperFn.urlsForUser(shortURL, userID, urlDatabase)) {
     return res.send('<script type="text/javascript">alert("You can only modify your own URLs.");window.history.back();</script>');
   }
 
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user };
+  const templateVars = { shortURL, longURL: urlDatabase[shortURL].longURL, user };
   res.render("urls_show", templateVars);
 });
-
-// was used for testing json file
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
-// was used for initial test
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
 
 // direct to the original URL
 app.get("/u/:shortURL", (req, res) => {
@@ -104,7 +95,7 @@ app.get("/u/:shortURL", (req, res) => {
   // if exists
   const longURL = urlDatabase[req.params.shortURL].longURL;
 
-  if (longURL === undefined) {
+  if (!longURL) {
     res.send('<script type="text/javascript">alert("The URL is invalid or currently inaccessible.");window.history.back();</script>');
   } else {
     res.redirect(301, longURL);
@@ -117,15 +108,19 @@ app.get("/register", (req, res) => {
   const user = helperFn.createUserObj(userID, users);
 
   let templateVars = { user };
-  if (Object.keys(user).length === 0) {
+  if (!userID) {
     return res.render("urls_register", templateVars);
   }
-  return res.redirect(301, '/urls');
+  res.redirect(301, '/urls');
 });
 
 // login page
 app.get("/login", (req, res) => {
   const userID = req.session.user_id;
+
+  if (userID) {
+    return res.redirect(301, '/urls');
+  }
   const user = helperFn.createUserObj(userID, users);
   let templateVars = { user };
   res.render("urls_login", templateVars);
@@ -136,12 +131,15 @@ app.get("/login", (req, res) => {
 // create new short URL
 app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
-  const user = helperFn.createUserObj(userID, users);
+  // const user = helperFn.createUserObj(userID, users);
   const shortStr = helperFn.generateRandomString(6);
   const newData = {};
 
+  if (!userID) {
+    return res.send('<script type="text/javascript">alert("Please login to create your short URL.");window.history.back();</script>');
+  }
   newData.longURL = req.body.longURL;
-  newData.userID = user.id;
+  newData.userID = userID;
   urlDatabase[shortStr] = newData;
 
   res.redirect(`/urls/${shortStr}`);
@@ -150,19 +148,19 @@ app.post("/urls", (req, res) => {
 // delete URL
 app.post("/urls/:shortURL/delete", (req, res) => {
   const userID = req.session.user_id;
-  const user = helperFn.createUserObj(userID, users);
+  const shortURL = req.params.shortURL;
 
   // if not logged in
-  if (Object.keys(user).length === 0) {
+  if (!userID) {
     return res.send('<script type="text/javascript">alert("Please login to delete your short URL.");window.history.back();</script>');
   }
 
   // if trying to modify someone else's url
-  if (!helperFn.urlsForUser(req, user, urlDatabase)) {
+  if (!helperFn.urlsForUser(shortURL, userID, urlDatabase)) {
     return res.send('<script type="text/javascript">alert("You can only delete your own URLs.");window.history.back();</script>');
   }
 
-  delete urlDatabase[req.params.shortURL];
+  delete urlDatabase[shortURL];
   res.redirect(301, "/urls");
 });
 
@@ -170,14 +168,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const oldName = req.params.shortURL;
   const newName = req.body.nname;
-  const url = urlDatabase[oldName];
-  const userID = req.session.user_id;
-  delete urlDatabase[oldName];
-  urlDatabase[newName] = url;
-  const user = helperFn.createUserObj(userID, users);
+  urlDatabase[newName] = urlDatabase[oldName];
 
-  let templateVars = { shortURL: newName, longURL: urlDatabase[newName], user };
-  res.render("urls_show", templateVars);
+  delete urlDatabase[oldName];
+  res.redirect(301, "/urls")
 });
 
 // login
@@ -198,7 +192,7 @@ app.post("/login", (req, res) => {
       return res.redirect(301, '/urls');
     }
   }
-  return res.status(403).send('<script type="text/javascript">alert("Incorrect Email or password. Please try again.");window.history.back();</script>');
+  res.status(403).send('<script type="text/javascript">alert("Incorrect Email or password. Please try again.");window.history.back();</script>');
 
 });
 
