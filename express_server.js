@@ -53,9 +53,9 @@ app.get("/urls/new", (req, res) => {
   const templateVars = { user };
 
   if (!userID) {
-    return res.redirect(301, "/login");
+    return res.redirect("/login");
   }
-  res.render("urls_new", templateVars);
+  return res.render("urls_new", templateVars);
 });
 
 // move to url edit page
