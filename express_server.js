@@ -35,10 +35,11 @@ app.get("/", (req, res) => {
 
 // show collection of urls for that user
 app.get("/urls", (req, res) => {
-  const user = helperFn.createUserObj(req, users);
+  const userID = req.session.user_id;
+  const user = helperFn.createUserObj(userID, users);
 
-  console.log(user, urlDatabase);
-  const userUrl = helperFn.createUserUrl(user, urlDatabase);
+  const userIDForUrl = user.id;
+  const userUrl = helperFn.createUserUrl(userIDForUrl, urlDatabase);
 
   const templateVars = { urls: userUrl, user };
   res.render("urls_index", templateVars);
@@ -46,7 +47,8 @@ app.get("/urls", (req, res) => {
 
 // move to URL creating page
 app.get("/urls/new", (req, res) => {
-  const user = helperFn.createUserObj(req, users);
+  const userID = req.session.user_id;
+  const user = helperFn.createUserObj(userID, users);
   const templateVars = { user };
 
   if (Object.keys(user).length === 0) {
@@ -57,7 +59,8 @@ app.get("/urls/new", (req, res) => {
 
 // move to url edit page
 app.get("/urls/:shortURL", (req, res) => {
-  const user = helperFn.createUserObj(req, users);
+  const userID = req.session.user_id;
+  const user = helperFn.createUserObj(userID, users);
 
   // if not logged in
   if (Object.keys(user).length === 0) {
@@ -102,14 +105,16 @@ app.get("/u/:shortURL", (req, res) => {
 
 // register page
 app.get("/register", (req, res) => {
-  const user = helperFn.createUserObj(req, users);
+  const userID = req.session.user_id;
+  const user = helperFn.createUserObj(userID, users);
   let templateVars = { user };
   res.render("urls_register", templateVars);
 });
 
 // login page
 app.get("/login", (req, res) => {
-  const user = helperFn.createUserObj(req, users);
+  const userID = req.session.user_id;
+  const user = helperFn.createUserObj(userID, users);
   let templateVars = { user };
   res.render("urls_login", templateVars);
 });
@@ -118,7 +123,8 @@ app.get("/login", (req, res) => {
 
 // create new short URL
 app.post("/urls", (req, res) => {
-  const user = helperFn.createUserObj(req, users);
+  const userID = req.session.user_id;
+  const user = helperFn.createUserObj(userID, users);
   const shortStr = helperFn.generateRandomString(6);
   const newData = {};
 
@@ -140,10 +146,10 @@ app.post("/urls/:shortURL", (req, res) => {
   const oldName = req.params.shortURL;
   const newName = req.body.nname;
   const url = urlDatabase[oldName];
+  const userID = req.session.user_id;
   delete urlDatabase[oldName];
   urlDatabase[newName] = url;
-
-  const user = helperFn.createUserObj(req, users);
+  const user = helperFn.createUserObj(userID, users);
 
   let templateVars = { shortURL: newName, longURL: urlDatabase[newName], user };
   res.render("urls_show", templateVars);

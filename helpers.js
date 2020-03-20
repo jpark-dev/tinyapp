@@ -21,8 +21,7 @@ const urlsForUser = (req, user, urlDB) => {
   return true;
 };
 
-const createUserObj = (req, userDB) => {
-  const userID = req.session.user_id;
+const createUserObj = (userID, userDB) => {
   const user = {};
   for (let uid in userDB) {
     if (userDB[uid].id === userID) {
@@ -32,10 +31,10 @@ const createUserObj = (req, userDB) => {
   return user;
 };
 
-const createUserUrl = (user, urlDB) => {
+const createUserUrl = (userID, urlDB) => {
   const userUrl = {};
   for (let el in urlDB) {
-    if (urlDB[el].userID === user.id) {
+    if (urlDB[el].userID === userID) {
       userUrl[el] = urlDB[el].longURL;
     }
   }
