@@ -30,16 +30,24 @@ app.set("view engine", "ejs");
 
 // GET handlers
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (req.session.user_id) {
+    return res.redirect("/urls");
+  }
+  res.redirect("/login");
 });
 
 // show collection of urls for that user
 app.get("/urls", (req, res) => {
+  console.log('urls!!!');
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
 
   const userIDForUrl = user.id;
   const userUrl = helperFn.createUserUrl(userIDForUrl, urlDatabase);
+
+  // if (Object.keys(user).length === 0) {
+  //   return res.send('<script type="text/javascript">alert("Please login.");window.history.back();</script>');
+  // }
 
   const templateVars = { urls: userUrl, user };
   res.render("urls_index", templateVars);
@@ -52,7 +60,7 @@ app.get("/urls/new", (req, res) => {
   const templateVars = { user };
 
   if (Object.keys(user).length === 0) {
-    return res.render("urls_login", templateVars);
+    return res.redirect(301, "/login");
   }
   res.render("urls_new", templateVars);
 });
@@ -107,8 +115,12 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/register", (req, res) => {
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
+
   let templateVars = { user };
-  res.render("urls_register", templateVars);
+  if (Object.keys(user).length === 0) {
+    return res.render("urls_register", templateVars);
+  }
+  return res.redirect(301, '/urls');
 });
 
 // login page
@@ -137,8 +149,21 @@ app.post("/urls", (req, res) => {
 
 // delete URL
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const userID = req.session.user_id;
+  const user = helperFn.createUserObj(userID, users);
+
+  // if not logged in
+  if (Object.keys(user).length === 0) {
+    return res.send('<script type="text/javascript">alert("Please login to delete your short URL.");window.history.back();</script>');
+  }
+
+  // if trying to modify someone else's url
+  if (!helperFn.urlsForUser(req, user, urlDatabase)) {
+    return res.send('<script type="text/javascript">alert("You can only delete your own URLs.");window.history.back();</script>');
+  }
+
   delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  res.redirect(301, "/urls");
 });
 
 // edit short URL
