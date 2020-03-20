@@ -161,7 +161,7 @@ app.post("/login", (req, res) => {
   const checkEmail = helperFn.getUserByEmail(email, users);
 
   if (checkEmail) {
-    const isValid = helperFn.isPasswordCorrect(req, checkEmail, bcrypt, users);
+    const isValid = helperFn.isPasswordCorrect(password, checkEmail, bcrypt, users);
     if (isValid) {
       req.session.user_id = users[isValid].id;
       return res.redirect(301, '/urls');

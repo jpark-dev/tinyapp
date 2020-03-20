@@ -1,5 +1,6 @@
 const { assert } = require('chai');
-const { getUserByEmail } = require('../helpers');
+const { getUserByEmail, isPasswordCorrect } = require('../helpers');
+const bcrypt = require("bcrypt");
 
 const testUsers = {
   "userRandomID": {
@@ -11,6 +12,11 @@ const testUsers = {
     id: "user2RandomID", 
     email: "user2@example.com", 
     password: "dishwasher-funk"
+  },
+  "user3RandomID": {
+    id: "user3RandomID",
+    email: "user3@example.com",
+    password: "$2b$10$MOrLs.h6S.zDvqOHxIuKQeFzH2.rcAus377LnZOaFygWGPWrrOUgy"
   }
 };
 
@@ -22,9 +28,29 @@ describe('getUserByEmail', () => {
     assert.equal(user, expectedOutput);
   });
   it('should return undefined with invalid email address', () => {
-    const user = getUserByEmail("user3@example.com", testUsers)
+    const user = getUserByEmail("user4@example.com", testUsers)
     const expectedOutput = undefined;
     assert.equal(user, expectedOutput);
+    
+  });
+});
 
-  })
+// isPasswordCorrect is fired only if user's email exists in the userDB
+describe('isPasswordCorrect', () => {
+  it('should return an ID if bcrypted password matches', () => {
+    const isPWCorrect = isPasswordCorrect("bbb", "user3RandomID", bcrypt, testUsers)
+    const expectedOutput = "user3RandomID";
+    assert.equal(isPWCorrect, expectedOutput);
+  });
+  it('should return false if bcrypted password does not match', () => {
+    const isPWCorrect = isPasswordCorrect("bbc", "user3RandomID", bcrypt, testUsers)
+    const expectedOutput = false;
+    assert.equal(isPWCorrect, expectedOutput);
+  });
+  it('should return false if the copied bcrypt password is entered to match the bcrypt password in userDB', () => {
+    const brutePassword = "$2b$10$MOrLs.h6S.zDvqOHxIuKQeFzH2.rcAus377LnZOaFygWGPWrrOUgy";
+    const isPWCorrect = isPasswordCorrect(brutePassword, "user3RandomID", bcrypt, testUsers)
+    const expectedOutput = false;
+    assert.equal(isPWCorrect, expectedOutput);
+  });
 });

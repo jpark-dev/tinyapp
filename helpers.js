@@ -7,8 +7,8 @@ const getUserByEmail = (email, userDB) => {
   return undefined;
 };
 
-const isPasswordCorrect = (req, uid, bcrypt, userDB) => {
-  if (bcrypt.compareSync(req.body.password, userDB[uid].password)) {
+const isPasswordCorrect = (password, uid, bcrypt, userDB) => {
+  if (bcrypt.compareSync(password, userDB[uid].password)) {
     return uid;
   }
   return false;
