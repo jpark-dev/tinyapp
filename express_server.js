@@ -171,7 +171,7 @@ app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[newName] = urlDatabase[oldName];
 
   delete urlDatabase[oldName];
-  res.redirect(301, "/urls")
+  res.redirect(301, "/urls");
 });
 
 // login

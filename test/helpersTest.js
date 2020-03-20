@@ -4,13 +4,13 @@ const bcrypt = require("bcrypt");
 
 const testUsers = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
   "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   },
   "user3RandomID": {
@@ -27,13 +27,13 @@ const testURLs = {
 
 describe('getUserByEmail', () => {
   it('should return a user with valid email', () => {
-    const user = getUserByEmail("user@example.com", testUsers)
+    const user = getUserByEmail("user@example.com", testUsers);
     const expectedOutput = "userRandomID";
     // Write your assert statement here
     assert.equal(user, expectedOutput);
   });
   it('should return undefined with invalid email address', () => {
-    const user = getUserByEmail("user4@example.com", testUsers)
+    const user = getUserByEmail("user4@example.com", testUsers);
     const expectedOutput = undefined;
     assert.equal(user, expectedOutput);
     
@@ -70,7 +70,7 @@ describe('createUserObj', () => {
     const user = createUserObj('user99RandomID', testUsers);
     const expectedOutput = {};
     assert.deepEqual(user, expectedOutput);
-  })
+  });
 });
 
 describe('createUserUrl', () => {
@@ -83,5 +83,5 @@ describe('createUserUrl', () => {
     const user = createUserUrl('user99RandomID', testURLs);
     const expectedOutput = {};
     assert.deepEqual(user, expectedOutput);
-  })
+  });
 });
