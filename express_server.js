@@ -96,16 +96,25 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // direct to the original URL
 app.get("/u/:shortURL", (req, res) => {
+  const userID = req.session.user_id;
+  const user = helperFn.createUserObj(userID, users);
+  const templateVars = { user };
+  let msg = '';
+
   // if short URL does not exist in DB
   if (!urlDatabase[req.params.shortURL]) {
-    return res.send('<script type="text/javascript">alert("Invalid short URL. Please check again.");window.history.back();</script>');
+    msg = 'Invalid short URL. Please check again.';
+    templateVars['msg'] = msg;
+    return res.render('urls_error', templateVars);
   }
 
-  // if exists
+  // if exists, retrieve corresponding url and redirect to it
   let longURL = urlDatabase[req.params.shortURL].longURL;
 
   if (!longURL) {
-    res.send('<script type="text/javascript">alert("The URL is invalid or currently inaccessible.");window.history.back();</script>');
+    msg = 'The URL is invalid or currently inaccessible.';
+    templateVars['msg'] = msg;
+    return res.render('urls_error', templateVars);
   } else {
     return res.redirect(longURL);
   }
@@ -140,19 +149,23 @@ app.get("/login", (req, res) => {
 // create new short URL
 app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
-  // const user = helperFn.createUserObj(userID, users);
+  const user = helperFn.createUserObj(userID, users);
+  const templateVars = { user };
   const shortStr = helperFn.generateRandomString(6);
   const newData = {};
   let longURL = req.body.longURL;
+
   if (!userID) {
-    return res.send('<script type="text/javascript">alert("Please login to create your short URL.");window.history.back();</script>');
+    msg = 'Please login to create your short URL.';
+    templateVars['msg'] = msg;
+    return res.render('urls_error', templateVars);
   }
   // const d = new Date().toUTCString();
   // d = d.addHours(14);
   // console.log('d', d);
 
   // if the url doesn't start with 'http://'
-  if (longURL.substr(0, 7) !== 'http://' && longURL.substr(0, 8) !== 'https://' ) {
+  if (longURL.substr(0, 7) !== 'http://' && longURL.substr(0, 8) !== 'https://') {
     longURL = `http://${longURL}`;
   }
 
@@ -167,16 +180,22 @@ app.post("/urls", (req, res) => {
 // delete URL
 app.post("/urls/:shortURL/delete", (req, res) => {
   const userID = req.session.user_id;
+  const user = helperFn.createUserObj(userID, users);
+  const templateVars = { user };
   const shortURL = req.params.shortURL;
 
   // if not logged in
   if (!userID) {
-    return res.send('<script type="text/javascript">alert("Please login to delete your short URL.");window.history.back();</script>');
+    msg = 'Please login to delete your short URL.';
+    templateVars['msg'] = msg;
+    return res.render('urls_error', templateVars);
   }
 
   // if trying to modify someone else's url
   if (!helperFn.urlsForUser(shortURL, userID, urlDatabase)) {
-    return res.send('<script type="text/javascript">alert("You can only delete your own URLs.");window.history.back();</script>');
+    msg = 'You can only delete your own short URLs...';
+    templateVars['msg'] = msg;
+    return res.render('urls_error', templateVars);
   }
 
   delete urlDatabase[shortURL];
@@ -189,7 +208,7 @@ app.post("/urls/:shortURL", (req, res) => {
   let newLongURL = req.body.nname;
 
   // if the edited url doesn't start with 'http://'
-  if (newLongURL.substr(0, 7) !== 'http://' && newLongURL.substr(0, 8) !== 'https://' ) {
+  if (newLongURL.substr(0, 7) !== 'http://' && newLongURL.substr(0, 8) !== 'https://') {
     newLongURL = `http://${newLongURL}`;
   }
 
@@ -200,11 +219,16 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // login
 app.post("/login", (req, res) => {
+  const userID = req.session.user_id;
+  const user = helperFn.createUserObj(userID, users);
+  const templateVars = { user };
   const email = req.body.email;
   const password = req.body.password;
 
   if (email === '' || password === '') {
-    return res.send('<script type="text/javascript">alert("Please enter both the email and password.");window.history.back();</script>');
+    msg = 'Please enter both the email and password.';
+    templateVars['msg'] = msg;
+    return res.render('urls_error', templateVars);
   }
 
   const checkEmail = helperFn.getUserByEmail(email, users);
@@ -216,7 +240,10 @@ app.post("/login", (req, res) => {
       return res.redirect(301, '/urls');
     }
   }
-  res.status(403).send('<script type="text/javascript">alert("Incorrect Email or password. Please try again.");window.history.back();</script>');
+  msg = 'Incorrect Email or password. Please try again.';
+  templateVars['msg'] = msg;
+  return res.render('urls_error', templateVars);
+
 
 });
 
@@ -228,17 +255,24 @@ app.post("/logout", (req, res) => {
 
 // register new account
 app.post("/register", (req, res) => {
+  const userID = req.session.user_id;
+  const user = helperFn.createUserObj(userID, users);
+  const templateVars = { user };
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password, 10);
 
   if (email === '' || password === '') {
     res.statusCode = 400;
-    return res.send('<script type="text/javascript">alert("Please enter both your email and password");window.history.back();</script>');
+    msg = 'Please enter both the email and password.';
+    templateVars['msg'] = msg;
+    return res.render('urls_error', templateVars);
   }
 
   if (helperFn.getUserByEmail(email, users)) {
     res.statusCode = 400;
-    return res.send('<script type="text/javascript">alert("The email is already being used.");window.history.back();</script>');
+    msg = 'The email is already being used.';
+    templateVars['msg'] = msg;
+    return res.render('urls_error', templateVars);
   }
   let id = helperFn.generateRandomString(6);
 
