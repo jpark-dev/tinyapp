@@ -95,8 +95,6 @@ app.get("/u/:shortURL", (req, res) => {
   // if exists
   let longURL = urlDatabase[req.params.shortURL].longURL;
 
-  console.log('URL: ', longURL);
-
   if (!longURL) {
     res.send('<script type="text/javascript">alert("The URL is invalid or currently inaccessible.");window.history.back();</script>');
   } else {
@@ -136,15 +134,22 @@ app.post("/urls", (req, res) => {
   // const user = helperFn.createUserObj(userID, users);
   const shortStr = helperFn.generateRandomString(6);
   const newData = {};
-
+  let longURL = req.body.longURL;
   if (!userID) {
     return res.send('<script type="text/javascript">alert("Please login to create your short URL.");window.history.back();</script>');
   }
   // const d = new Date().toUTCString();
   // d = d.addHours(14);
   // console.log('d', d);
-  newData.longURL = req.body.longURL;
+
+  // if the url doesn't start with 'http://'
+  if (longURL.substr(0, 7) !== 'http://' && longURL.substr(0, 8) !== 'https://' ) {
+    longURL = `http://${longURL}`;
+  }
+
+  newData.longURL = longURL;
   newData.userID = userID;
+
   urlDatabase[shortStr] = newData;
 
   res.redirect(`/urls/${shortStr}`);
@@ -175,7 +180,7 @@ app.post("/urls/:shortURL", (req, res) => {
   let newLongURL = req.body.nname;
 
   // if the edited url doesn't start with 'http://'
-  if (newLongURL.substr(0, 7) !== 'http://') {
+  if (newLongURL.substr(0, 7) !== 'http://' && newLongURL.substr(0, 8) !== 'https://' ) {
     newLongURL = `http://${newLongURL}`;
   }
 
