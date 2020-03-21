@@ -95,10 +95,12 @@ app.get("/u/:shortURL", (req, res) => {
   // if exists
   let longURL = urlDatabase[req.params.shortURL].longURL;
 
+  console.log('URL: ', longURL);
+
   if (!longURL) {
     res.send('<script type="text/javascript">alert("The URL is invalid or currently inaccessible.");window.history.back();</script>');
   } else {
-    res.redirect(301, longURL);
+    return res.redirect(longURL);
   }
 });
 
@@ -170,7 +172,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // edit original URL, not short URL
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const newLongURL = req.body.nname;
+  let newLongURL = req.body.nname;
+
+  // if the edited url doesn't start with 'http://'
+  if (newLongURL.substr(0, 7) !== 'http://') {
+    newLongURL = `http://${newLongURL}`;
+  }
 
   urlDatabase[shortURL].longURL = newLongURL;
 
