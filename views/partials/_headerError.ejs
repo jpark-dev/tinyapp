@@ -11,7 +11,21 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
       <div class="navbar-collapse nav justify-content-end">
+        <% if (!user.email) { %>
+        <form class="form-inline" action="/register" method="GET">
+          <input type="submit" class="btn btn-primary" value="Register">
+        </form>
+        <form style="padding-left: 10px;" class="form-inline" action="/login" method="GET">
+          <input type="submit" class="btn btn-secondary" value="Login">
+        </form>
+        <% } else { %>
+        <form class="form-inline" action="/logout" method="POST">
+          <span style="padding-right: 20px">Logged In As: <%= user.email %></span>
+          <input type="submit" class="btn btn-dark" value="logout">
+        </form>
+        <% } %>
       </div>
+    </div>
     </div>
   </nav>
 </header>
