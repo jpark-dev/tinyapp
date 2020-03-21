@@ -64,24 +64,33 @@ app.get("/urls/:shortURL", (req, res) => {
   const user = helperFn.createUserObj(userID, users);
   const shortURL = req.params.shortURL;
   const isURL = urlDatabase[shortURL];
+  const templateVars = { shortURL, user };
+  let msg = '';
 
   // if not logged in
   if (!userID) {
-    return res.send('<script type="text/javascript">alert("Please login to modify your short URL.");window.history.back();</script>');
+    msg = 'Please login to modify your short URL.';
+    templateVars['msg'] = msg;
+    return res.render('urls_error', templateVars);
   }
 
   // if url does not exist
   if (!isURL) {
-    return res.send('<script type="text/javascript">alert("Not a valid URL.");window.history.back();</script>');
+    msg = 'Not a valid URL.';
+    templateVars['msg'] = msg;
+    return res.render('urls_error', templateVars);
 
+  } else {
+    templateVars['longURL'] = urlDatabase[shortURL].longURL;
   }
 
   // if trying to modify someone else's url
   if (!helperFn.urlsForUser(shortURL, userID, urlDatabase)) {
-    return res.send('<script type="text/javascript">alert("You can only modify your own URLs.");window.history.back();</script>');
+    msg = 'You can only modify your own URLs.';
+    templateVars['msg'] = msg;
+    return res.render('urls_error', templateVars);
   }
 
-  const templateVars = { shortURL, longURL: urlDatabase[shortURL].longURL, user };
   res.render("urls_show", templateVars);
 });
 
