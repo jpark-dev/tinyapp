@@ -5,7 +5,6 @@ const getUserByEmail = (email, userDB) => {
       return uid;
     }
   }
-  return undefined;
 };
 
 // password validation via bcrypt
