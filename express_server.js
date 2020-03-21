@@ -93,7 +93,7 @@ app.get("/u/:shortURL", (req, res) => {
   }
 
   // if exists
-  const longURL = urlDatabase[req.params.shortURL].longURL;
+  let longURL = urlDatabase[req.params.shortURL].longURL;
 
   if (!longURL) {
     res.send('<script type="text/javascript">alert("The URL is invalid or currently inaccessible.");window.history.back();</script>');
@@ -138,6 +138,9 @@ app.post("/urls", (req, res) => {
   if (!userID) {
     return res.send('<script type="text/javascript">alert("Please login to create your short URL.");window.history.back();</script>');
   }
+  // const d = new Date().toUTCString();
+  // d = d.addHours(14);
+  // console.log('d', d);
   newData.longURL = req.body.longURL;
   newData.userID = userID;
   urlDatabase[shortStr] = newData;
@@ -164,13 +167,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect(301, "/urls");
 });
 
-// edit short URL
+// edit original URL, not short URL
 app.post("/urls/:shortURL", (req, res) => {
-  const oldName = req.params.shortURL;
-  const newName = req.body.nname;
-  urlDatabase[newName] = urlDatabase[oldName];
+  const shortURL = req.params.shortURL;
+  const newLongURL = req.body.nname;
 
-  delete urlDatabase[oldName];
+  urlDatabase[shortURL].longURL = newLongURL;
+
   res.redirect(301, "/urls");
 });
 
