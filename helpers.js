@@ -1,3 +1,4 @@
+// get user info with email, if no email exists, return undefined
 const getUserByEmail = (email, userDB) => {
   for (let uid in userDB) {
     if (userDB[uid].email === email) {
@@ -7,6 +8,7 @@ const getUserByEmail = (email, userDB) => {
   return undefined;
 };
 
+// password validation via bcrypt
 const isPasswordCorrect = (password, uid, bcrypt, userDB) => {
   if (bcrypt.compareSync(password, userDB[uid].password)) {
     return uid;
@@ -14,6 +16,7 @@ const isPasswordCorrect = (password, uid, bcrypt, userDB) => {
   return false;
 };
 
+// return true if requested url belongs to userID
 const urlsForUser = (shortURL, userID, urlDB) => {
   if (userID !== urlDB[shortURL].userID) {
     return false;
@@ -21,6 +24,7 @@ const urlsForUser = (shortURL, userID, urlDB) => {
   return true;
 };
 
+// create user object from DB with userID
 const createUserObj = (userID, userDB) => {
   const user = {};
   for (let uid in userDB) {
@@ -31,6 +35,7 @@ const createUserObj = (userID, userDB) => {
   return user;
 };
 
+// create object userURl with urls belong to userID
 const createUserUrl = (userID, urlDB) => {
   const userUrl = {};
   for (let el in urlDB) {
@@ -41,6 +46,7 @@ const createUserUrl = (userID, urlDB) => {
   return userUrl;
 };
 
+// create a random alphanumeric with length: num
 const generateRandomString = (num) => {
   let result = '';
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
