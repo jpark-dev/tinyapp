@@ -33,8 +33,8 @@
         <% for(let url in urls) { %>
         <tr>
           <td><a href="/u/<%= url %>"><%= url %></a></td>
-          <td><%= urls[url] %></td>
-          <td>date created</td>
+          <td><%= urls[url].longURL %></td>
+          <td><%= urls[url].timeCreated %></td>
           <td>
             <form class="form-inline" method="GET" action="/urls/<%= url %>">
               <input type="submit" class="btn btn-outline-success" value="Edit">
