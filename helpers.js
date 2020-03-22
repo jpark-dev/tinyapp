@@ -39,7 +39,10 @@ const createUserUrl = (userID, urlDB) => {
   const userUrl = {};
   for (let el in urlDB) {
     if (urlDB[el].userID === userID) {
-      userUrl[el] = urlDB[el].longURL;
+      const urlData = {};
+      urlData['longURL'] = urlDB[el].longURL;
+      urlData['timeCreated'] = urlDB[el].timeCreated;
+      userUrl[el] = urlData;
     }
   }
   return userUrl;
