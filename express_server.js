@@ -164,9 +164,10 @@ app.put("/urls", (req, res) => {
     templateVars['msg'] = msg;
     return res.render('urls_error', templateVars);
   }
-  // const d = new Date().toUTCString();
-  // d = d.addHours(14);
-  // console.log('d', d);
+
+  // set created Date / Time
+  let curTime = new Date();
+  let timeCreated = curTime.toUTCString();
 
   // if the url doesn't start with 'http://'
   if (longURL.substr(0, 7) !== 'http://' && longURL.substr(0, 8) !== 'https://') {
@@ -175,6 +176,7 @@ app.put("/urls", (req, res) => {
 
   newData.longURL = longURL;
   newData.userID = userID;
+  newData.timeCreated = timeCreated;
 
   urlDatabase[shortStr] = newData;
 
