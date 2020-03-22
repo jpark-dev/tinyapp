@@ -9,8 +9,8 @@ const methodOverride = require('method-override')
 
 
 const urlDatabase = {
-  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "aaaaaa" },
-  "9sm5xK": { longURL: "http://www.google.com", userID: "aaaaaa" }
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "aaaaaa", count: 0 },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "aaaaaa", count: 97 }
 };
 
 const users = {
@@ -67,7 +67,8 @@ app.get("/urls/:shortURL", (req, res) => {
   const user = helperFn.createUserObj(userID, users);
   const shortURL = req.params.shortURL;
   const isURL = urlDatabase[shortURL];
-  const templateVars = { shortURL, user };
+  const useCount = urlDatabase[shortURL].count; 
+  const templateVars = { shortURL, user, useCount };
   let msg = '';
 
   // if not logged in
@@ -102,6 +103,7 @@ app.get("/u/:shortURL", (req, res) => {
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
   const templateVars = { user };
+  let accessCounter = urlDatabase[req.params.shortURL].count;
   let msg = '';
 
   // if short URL does not exist in DB
@@ -119,6 +121,7 @@ app.get("/u/:shortURL", (req, res) => {
     templateVars['msg'] = msg;
     return res.render('urls_error', templateVars);
   } else {
+    urlDatabase[req.params.shortURL].count = Number(accessCounter) + 1;
     return res.redirect(longURL);
   }
 });
@@ -177,6 +180,7 @@ app.put("/urls", (req, res) => {
   newData.longURL = longURL;
   newData.userID = userID;
   newData.timeCreated = timeCreated;
+  newData.count = 0;
 
   urlDatabase[shortStr] = newData;
 

@@ -18,7 +18,10 @@
 
     </div>
     <div class="align-self-center card-body">
-      <span>Edit</span>
+      <blockquote>
+        <p class="mb-0">Pleaase enter the new web address for your current shortURL.</p>
+        <footer class="blockquote-footer">Your URL has been used <span style="font-weight:bold"><%= useCount %></span> times so far.</footer>
+      </blockquote>
       <form class="form-inline" method="POST" action="/urls/<%= shortURL %>">
         <span style="padding-right: 5px">New URL:</span>
         <input class="form-control mr-sm-2" type="text" name="nname">
