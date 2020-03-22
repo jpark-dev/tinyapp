@@ -68,7 +68,9 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const isURL = urlDatabase[shortURL];
   const useCount = urlDatabase[shortURL].count; 
-  const templateVars = { shortURL, user, useCount };
+  const timeCreated = urlDatabase[shortURL].timeCreated;
+  // const {useCount, timeCreated} = urlDatabase[shortURL];
+  const templateVars = { shortURL, user, useCount, timeCreated };
   let msg = '';
 
   // if not logged in

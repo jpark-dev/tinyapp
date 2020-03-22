@@ -42,6 +42,7 @@ const createUserUrl = (userID, urlDB) => {
       const urlData = {};
       urlData['longURL'] = urlDB[el].longURL;
       urlData['timeCreated'] = urlDB[el].timeCreated;
+      urlData['count'] = urlDB[el].count;
       userUrl[el] = urlData;
     }
   }
