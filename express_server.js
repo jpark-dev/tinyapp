@@ -5,6 +5,8 @@ const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcrypt");
 const helperFn = require('./helpers');
+const methodOverride = require('method-override')
+
 
 const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "aaaaaa" },
@@ -25,6 +27,7 @@ app.use(cookieSession({
 }));
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 
 app.set("view engine", "ejs");
 
@@ -147,7 +150,8 @@ app.get("/login", (req, res) => {
 // POST handlers
 
 // create new short URL
-app.post("/urls", (req, res) => {
+// app.post("/urls", (req, res) => {
+app.put("/urls", (req, res) => {
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
   const templateVars = { user };
@@ -178,7 +182,8 @@ app.post("/urls", (req, res) => {
 });
 
 // delete URL
-app.post("/urls/:shortURL/delete", (req, res) => {
+// app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL/", (req, res) => {
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
   const templateVars = { user };
@@ -254,7 +259,7 @@ app.post("/logout", (req, res) => {
 });
 
 // register new account
-app.post("/register", (req, res) => {
+app.put("/register", (req, res) => {
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
   const templateVars = { user };
