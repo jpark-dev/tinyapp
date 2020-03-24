@@ -69,7 +69,6 @@ app.get("/urls/:shortURL", (req, res) => {
   const isURL = urlDatabase[shortURL];
   const useCount = urlDatabase[shortURL].count; 
   const timeCreated = urlDatabase[shortURL].timeCreated;
-  // const {useCount, timeCreated} = urlDatabase[shortURL];
   const templateVars = { shortURL, user, useCount, timeCreated };
   let msg = '';
 
@@ -155,7 +154,6 @@ app.get("/login", (req, res) => {
 // POST handlers
 
 // create new short URL
-// app.post("/urls", (req, res) => {
 app.put("/urls", (req, res) => {
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
@@ -190,7 +188,6 @@ app.put("/urls", (req, res) => {
 });
 
 // delete URL
-// app.post("/urls/:shortURL/delete", (req, res) => {
 app.delete("/urls/:shortURL/", (req, res) => {
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
