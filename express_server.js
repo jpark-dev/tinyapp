@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcrypt");
 const helperFn = require('./helpers');
-const methodOverride = require('method-override')
+const methodOverride = require('method-override');
 
 
 const urlDatabase = {
@@ -67,7 +67,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const user = helperFn.createUserObj(userID, users);
   const shortURL = req.params.shortURL;
   const isURL = urlDatabase[shortURL];
-  const useCount = urlDatabase[shortURL].count; 
+  const useCount = urlDatabase[shortURL].count;
   const timeCreated = urlDatabase[shortURL].timeCreated;
   const templateVars = { shortURL, user, useCount, timeCreated };
   let msg = '';
@@ -104,7 +104,7 @@ app.get("/u/:shortURL", (req, res) => {
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
   const templateVars = { user };
-  let accessCounter = urlDatabase[req.params.shortURL].count;
+  const accessCounter = urlDatabase[req.params.shortURL].count;
   let msg = '';
 
   // if short URL does not exist in DB
@@ -115,7 +115,7 @@ app.get("/u/:shortURL", (req, res) => {
   }
 
   // if exists, retrieve corresponding url and redirect to it
-  let longURL = urlDatabase[req.params.shortURL].longURL;
+  const longURL = urlDatabase[req.params.shortURL].longURL;
 
   if (!longURL) {
     msg = 'The URL is invalid or currently inaccessible.';
@@ -132,7 +132,7 @@ app.get("/register", (req, res) => {
   const userID = req.session.user_id;
   const user = helperFn.createUserObj(userID, users);
 
-  let templateVars = { user };
+  const templateVars = { user };
   if (!userID) {
     return res.render("urls_register", templateVars);
   }
@@ -147,7 +147,7 @@ app.get("/login", (req, res) => {
     return res.redirect(301, '/urls');
   }
   const user = helperFn.createUserObj(userID, users);
-  let templateVars = { user };
+  const templateVars = { user };
   res.render("urls_login", templateVars);
 });
 
@@ -163,14 +163,14 @@ app.put("/urls", (req, res) => {
   let longURL = req.body.longURL;
 
   if (!userID) {
-    msg = 'Please login to create your short URL.';
+    const msg = 'Please login to create your short URL.';
     templateVars['msg'] = msg;
     return res.render('urls_error', templateVars);
   }
 
   // set created Date / Time
   let curTime = new Date();
-  let timeCreated = curTime.toUTCString();
+  const timeCreated = curTime.toUTCString();
 
   // if the url doesn't start with 'http://'
   if (longURL.substr(0, 7) !== 'http://' && longURL.substr(0, 8) !== 'https://') {
@@ -193,6 +193,7 @@ app.delete("/urls/:shortURL/", (req, res) => {
   const user = helperFn.createUserObj(userID, users);
   const templateVars = { user };
   const shortURL = req.params.shortURL;
+  let msg = '';
 
   // if not logged in
   if (!userID) {
@@ -234,6 +235,7 @@ app.post("/login", (req, res) => {
   const templateVars = { user };
   const email = req.body.email;
   const password = req.body.password;
+  let msg = '';
 
   if (email === '' || password === '') {
     msg = 'Please enter both the email and password.';
@@ -270,6 +272,7 @@ app.put("/register", (req, res) => {
   const templateVars = { user };
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password, 10);
+  let msg = '';
 
   if (email === '' || password === '') {
     res.statusCode = 400;
@@ -284,7 +287,7 @@ app.put("/register", (req, res) => {
     templateVars['msg'] = msg;
     return res.render('urls_error', templateVars);
   }
-  let id = helperFn.generateRandomString(6);
+  const id = helperFn.generateRandomString(6);
 
   users[id] =
   {
